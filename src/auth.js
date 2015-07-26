@@ -162,10 +162,10 @@ devise.provider('Auth', function AuthProvider() {
              *                  rejected by the server.
              */
             login: function(creds, config) {
-                var withCredentials = arguments.length > 0,
+                var withCredentials = !!creds,
                     loggedIn = service.isAuthenticated();
-
                 creds = creds || {};
+
                 return $http(httpConfig('login', creds, config))
                     .then(service.parse)
                     .then(save)
@@ -244,14 +244,18 @@ devise.provider('Auth', function AuthProvider() {
              *  3. Neither Auth nor the server has an authenticated session,
              *      and will reject with an unauthenticated error.
              *
+             * @param {Object} [config] Optional, additional config which
+             *                  will be added to http config for underlying
+             *                  $http.
              * @returns {Promise} A $http promise that will be resolved or
              *                  rejected by the server.
              */
-            currentUser: function() {
+            currentUser: function(config) {
+                config  = config || {};
                 if (service.isAuthenticated()) {
                     return $q.when(service._currentUser);
                 }
-                return service.login();
+                return service.login(null, config);
             },
 
             /**
